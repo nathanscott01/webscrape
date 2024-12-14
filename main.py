@@ -31,8 +31,7 @@ def start_scraping():
     """Start scraping ;)"""
     build_query_list()
     while query_list is not None:
-
-
+        return NotImplementedError
 
 
 # Press the green button in the gutter to run the script.
