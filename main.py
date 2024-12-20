@@ -7,6 +7,10 @@ Main:
     - Accesses individual modules
     - Mediates access to objects between classes/modules
 """
+import random
+from request_query import *
+from process_query import *
+from create_spreadsheet import *
 
 
 """
@@ -20,20 +24,21 @@ The process of webscraping for data is as follows:
 6.  When webscraping completed, create spreadsheet
 """
 
-from request_query import *
-from process_query import *
-from create_spreadsheet import *
-
-headers = ['Region', 'City', 'Establishment Type', 'Name', 'Email', 'Phone Number']
-
 
 def start_scraping():
     """Start scraping ;)"""
-    build_query_list()
-    while query_list is not None:
-        return NotImplementedError
+    build_query_list(regions, types)
+    next_query_request = next_query()
+    while next_query_request is not None:
+        region, city, establishment = next_query_request
+        webscrape(region, city, establishment)
+        time.sleep(random.uniform(1, 3))
+        next_query_request = next_query()
+    table_data = fetch_table()
+    create_csv(table_data)
 
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     start_scraping()
+
