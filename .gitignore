@@ -1,0 +1,13 @@
+# Exclude environment variables and secrets
+.env
+
+# Ignore compiled files
+__pycache__/
+*.pyc
+*.pyo
+
+# Ignore logs and temp files
+*.log
+*.tmp
+*.csv
+*.xlsx
