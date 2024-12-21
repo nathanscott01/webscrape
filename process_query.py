@@ -14,6 +14,7 @@ import requests
 from dotenv import load_dotenv
 import os
 import logging
+import time
 
 
 # Load API key from .env
@@ -30,7 +31,7 @@ logging.basicConfig(
 
 # Todo - Initialise data object
 data = []
-SERP_API_ENDPOINT = 'https://api.brightdata.com/serp'
+SERP_API_ENDPOINT = 'https://api.brightdata.com/serp-api'
 table_headers = ['Region', 'City', 'Establishment Type', 'Title', 'Link']
 
 # # Todo - Define a user-agent/header to avoid being blocked
