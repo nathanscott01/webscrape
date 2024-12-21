@@ -8,6 +8,7 @@ Main:
     - Mediates access to objects between classes/modules
 """
 import random
+import time
 from request_query import *
 from process_query import *
 from create_spreadsheet import *
