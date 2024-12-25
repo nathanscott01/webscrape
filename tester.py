@@ -1,40 +1,27 @@
 import requests
 from dotenv import load_dotenv
 import os
-import time
-import logging
+from bs4 import BeautifulSoup
 
 # Load API key from .env
 load_dotenv()
 API_KEY = os.getenv('BRIGHT_DATA_API_KEY')
 
 
-# Load in SSL Certificate
-CA_CERT_PATH = os.path.join(os.path.dirname(__file__), 'brightdata_ca.crt')
-
+url = "https://api.brightdata.com/request"
 data = []
 table_headers = ['Region', 'City', 'Establishment Type', 'Title', 'Link']
-SERP_API_ENDPOINT = 'https://api.brightdata.com/serp-api'
 
 
-# Configure Logging
-logging.basicConfig(
-    filename='scraping_errors.log',
-    level=logging.ERROR,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
-
-
-def webscrape(region, city, establishment_type, retries=3):
+def webscrape(region, city, establishment_type):
     """Scrape data using the query, plug key_words into query, create table using the given headers, log errors"""
-    query = f"{establishment_type} in {city} {region} New Zealand"
+    search_query = f"{establishment_type}+in+{city}+{region}+New+Zealand"
 
-    # Payload to be sent to Bright Data API
     payload = {
-        "query": query,
-        "location": f"{city}, {region}, New Zealand",
-        "language": "en",
-        "device": "desktop"
+        "url": f"https://www.google.com/search?q={search_query}",
+        "format": "raw",
+        "method": "GET",
+        "zone": "my_personal_project"
     }
 
     # Headers with Authorization Token
@@ -43,38 +30,17 @@ def webscrape(region, city, establishment_type, retries=3):
         "Content-Type": "application/json"
     }
 
-    for attempt in range(retries):
-        try:
-            response = requests.post(
-                SERP_API_ENDPOINT,
-                headers=headers,
-                json=payload,
-                verify=CA_CERT_PATH
-            )
+    response = requests.request("POST", url, json=payload, headers=headers)
+    response.raise_for_status()  # Raise HTTPError for bad responses
 
-            # Handle 429 Error (Rate Limit)
-            if response.status_code == 429:
-                logging.warning(f"Rate limit hit for {query}. Retrying in 10 seconds (Attempt {attempt + 1}/{retries})...")
-                time.sleep(10)  # Wait before retrying
-                continue  # Retry the request
+    # Process HTML with BeautifulSoup
+    soup = BeautifulSoup(response.text, 'html.parser')
 
-            response.raise_for_status()  # Raise HTTPError for bad responses
-            search_results = response.json()
-
-            for result in search_results.get('organic_results', []):
-                title = result.get('title', 'No title')
-                link = result.get('link', 'No link')
-                add_to_table(establishment_type, city, region, title, link)
-
-        except requests.exceptions.RequestException as e:
-            # Log connection or HTTP errors
-            logging.error(f"Error scraping {query} on attempt {attempt+1}: {e}")
-            if attempt == retries - 1:
-                logging.error(f"Max retries reached for {query}. Skipping...")
-
-        except Exception as e:
-            # Log unexpected errors
-            logging.error(f"Unexpected error for {query}: {e}")
+    # Reuse the old logic to extract organic results
+    for result in soup.select('.tF2Cxc'):
+        title = result.select_one('.LC20lb').text if result.select_one('.LC20lb') else "No title"
+        link = result.select_one('a')['href'] if result.select_one('a') else "No link"
+        add_to_table(establishment_type, city, region, title, link)
 
 
 def add_to_table(establishment, city, region, title, link):

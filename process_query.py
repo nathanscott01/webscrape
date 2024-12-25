@@ -15,6 +15,7 @@ from dotenv import load_dotenv
 import os
 import logging
 import time
+from bs4 import BeautifulSoup
 
 
 # Load API key from .env
@@ -31,27 +32,23 @@ logging.basicConfig(
 
 # Todo - Initialise data object
 data = []
-SERP_API_ENDPOINT = 'https://api.brightdata.com/serp-api'
+url = "https://api.brightdata.com/request"
 table_headers = ['Region', 'City', 'Establishment Type', 'Title', 'Link']
-
-# # Todo - Define a user-agent/header to avoid being blocked
-# headers = {
-#     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 '
-#                   'Safari/537.36'
-# }
 
 
 def webscrape(region, city, establishment_type, retries=3):
     """Scrape data using the query, plug key_words into query, create table
     using the given headers, log errors"""
-    query = f"{establishment_type} in {city} {region} New Zealand"
+    # search_query = f"{establishment_type}+in+{city}+{region}+New+Zealand"
 
-    # Payload to be sent to Bright Data API
+    search_query = f"{establishment_type} in {city} {region} New Zealand"
+    search_query = search_query.replace(" ", "+")  # Replace all spaces with '+'
+
     payload = {
-        "query": query,
-        "location": f"{city}, {region}, New Zealand",
-        "language": "en",
-        "device": "desktop"
+        "url": f"https://www.google.com/search?q={search_query}",
+        "format": "raw",
+        "method": "GET",
+        "zone": "my_personal_project"
     }
 
     # Headers with Authorization Token
@@ -62,40 +59,37 @@ def webscrape(region, city, establishment_type, retries=3):
 
     for attempt in range(retries):
         try:
-            # url = f"https://www.google.com/search?q={query.replace(' ', '+')}"
-
-            # response = requests.get(url, headers=headers)
-            response = requests.post(SERP_API_ENDPOINT, headers=headers, json=payload)
+            response = requests.request("POST", url, json=payload, headers=headers)
 
             # Handle 429 Error (Rate Limit)
             if response.status_code == 429:
-                logging.warning(f"Rate limit hit for {query}. Retrying in 10 seconds (Attempt {attempt + 1}/{retries})...")
+                logging.warning(f"Rate limit hit for {search_query}. Retrying in 10 seconds (Attempt {attempt + 1}"
+                                f"/{retries})...")
                 time.sleep(10)  # Wait before retrying
                 continue  # Retry the request
 
             response.raise_for_status()  # Raise HTTPError for bad responses
-            search_results = response.json()
+            soup = BeautifulSoup(response.text, 'html.parser')
 
-            # soup = BeautifulSoup(response.text, 'html.parser')
-            # for result in soup.select('.tF2Cxc'):
-            #     title = result.select_one('.LC20lb').text if result.select_one('.LC20lb') else "No title"
-            #     link = result.select_one('a')['href'] if result.select_one('a') else "No link"
-            #     add_to_table("gym", "Dunedin", "Otago", title, link)
-
-            for result in search_results.get('organic search', []):
-                title = result.get('title', 'No title')
-                link = result.get('link', 'No link')
+            # Reuse the old logic to extract organic results
+            for result in soup.select('.tF2Cxc'):
+                title = result.select_one('.LC20lb').text if result.select_one('.LC20lb') else "No title"
+                link = result.select_one('a')['href'] if result.select_one('a') else "No link"
                 add_to_table(establishment_type, city, region, title, link)
+            break
 
         except requests.exceptions.RequestException as e:
             # Log connection or HTTP errors
-            logging.error(f"Error scraping {query} on attempt {attempt+1}: {e}")
+            logging.error(f"Error scraping {search_query} on attempt {attempt+1}: {e}")
+
+            # Log final error and skip to next query if max retries are reached
             if attempt == retries - 1:
-                logging.error(f"Max retries reached for {query}. Skipping...")
+                logging.error(f"Max retries reached for {search_query}. Skipping...")
 
         except Exception as e:
             # Log unexpected errors
-            logging.error(f"Unexpected error for {query}: {e}")
+            logging.error(f"Unexpected error for {search_query}: {e}")
+            break
 
 
 def add_to_table(establishment, city, region, title, link):
