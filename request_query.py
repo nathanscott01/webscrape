@@ -10,7 +10,7 @@ Request Query:
 # Define regions and cities/towns in New Zealand
 regions = {
     'Northland': [
-        'Whangārei', 'Kaitaia', 'Kerikeri', 'Dargaville', 'Kaikohe', 'Paihia', 'Russell', 'Kawakawa', 'Hikurangi',
+        'Whangarei', 'Kaitaia', 'Kerikeri', 'Dargaville', 'Kaikohe', 'Paihia', 'Russell', 'Kawakawa', 'Hikurangi',
         'Moerewa'
     ],
     'Auckland': [
@@ -18,11 +18,11 @@ regions = {
         'Wellsford'
     ],
     'Waikato': [
-        'Hamilton', 'Cambridge', 'Taupō', 'Te Awamutu', 'Tokoroa', 'Morrinsville', 'Thames', 'Matamata', 'Huntly',
-        'Ngāruawāhia'
+        'Hamilton', 'Cambridge', 'Taupo', 'Te Awamutu', 'Tokoroa', 'Morrinsville', 'Thames', 'Matamata', 'Huntly',
+        'Ngaruawāhia'
     ],
     'Bay of Plenty': [
-        'Tauranga', 'Rotorua', 'Whakatāne', 'Kawerau', 'Ōpōtiki', 'Te Puke', 'Murupara', 'Edgecumbe', 'Maketu',
+        'Tauranga', 'Rotorua', 'Whakatane', 'Kawerau', 'Opotiki', 'Te Puke', 'Murupara', 'Edgecumbe', 'Maketu',
         'Pongakawa'
     ],
     'Gisborne': [
@@ -34,12 +34,12 @@ regions = {
         'Ahuriri'
     ],
     'Taranaki': [
-        'New Plymouth', 'Hāwera', 'Stratford', 'Waitara', 'Inglewood', 'Eltham', 'Ōpunake', 'Patea', 'Manaia',
+        'New Plymouth', 'Hawera', 'Stratford', 'Waitara', 'Inglewood', 'Eltham', 'Opunake', 'Patea', 'Manaia',
         'Waverley'
     ],
-    'Manawatū-Whanganui': [
+    'Manawatu-Whanganui': [
         'Palmerston North', 'Whanganui', 'Levin', 'Feilding', 'Dannevirke', 'Marton', 'Foxton', 'Pahiatua', 'Taihape',
-        'Ōtaki'
+        'Otaki'
     ],
     'Wellington': [
         'Wellington', 'Lower Hutt', 'Upper Hutt', 'Porirua', 'Masterton', 'Paraparaumu', 'Kapiti', 'Waikanae',
@@ -74,8 +74,11 @@ regions = {
 }
 
 # Establishment types
-types = ['gym', 'supplement store', 'pilates studio', 'yoga studio', 'pharmacy', 'health store']
+# types = ['gym', 'supplement store', 'pilates studio', 'yoga studio', 'pharmacy', 'health store']
 # types = ['gym', 'pilates studio']
+types = ['Civil construction', 'Civil', 'Silage', 'Contractor', 'Excavator', 'Truck', 'Tractor', 'Car Dealership',
+         'Haulage', 'Logistics', 'Cement', 'Agricultural Contractor']
+
 
 
 query_list = []
